@@ -9,7 +9,9 @@ from typing import Any
 import duckdb
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
+from plotly.subplots import make_subplots
 
 from ecommerce_analytics.retail_etl import build_retail_dataset
 from scripts.download_uci_retail import download_dataset
@@ -241,25 +243,36 @@ with overview_tab:
         st.plotly_chart(country_figure, width="stretch")
 
     st.subheader("Revenue and order volume")
-    monthly_long = monthly.melt(
-        id_vars="month",
-        value_vars=["revenue", "orders"],
-        var_name="metric",
-        value_name="value",
+    volume_figure = make_subplots(specs=[[{"secondary_y": True}]])
+    volume_figure.add_trace(
+        go.Bar(
+            x=monthly["month"],
+            y=monthly["revenue"],
+            name="Revenue",
+            marker_color=COLORS["amber"],
+            hovertemplate="%{x|%b %Y}<br>Revenue: GBP %{y:,.0f}<extra></extra>",
+        ),
+        secondary_y=False,
     )
-    volume_figure = px.bar(
-        monthly_long,
-        x="month",
-        y="value",
-        color="metric",
-        barmode="group",
-        color_discrete_map={
-            "revenue": COLORS["amber"],
-            "orders": COLORS["blue"],
-        },
-        labels={"month": "Month", "value": "Value", "metric": "Metric"},
+    volume_figure.add_trace(
+        go.Scatter(
+            x=monthly["month"],
+            y=monthly["orders"],
+            name="Orders",
+            mode="lines+markers",
+            line={"color": COLORS["blue"], "width": 3},
+            marker={"size": 7},
+            hovertemplate="%{x|%b %Y}<br>Orders: %{y:,.0f}<extra></extra>",
+        ),
+        secondary_y=True,
     )
-    volume_figure.update_layout(height=340)
+    volume_figure.update_layout(height=340, hovermode="x unified")
+    volume_figure.update_yaxes(
+        title_text="Revenue (GBP)",
+        tickprefix="GBP ",
+        secondary_y=False,
+    )
+    volume_figure.update_yaxes(title_text="Orders", secondary_y=True)
     st.plotly_chart(volume_figure, width="stretch")
 
 with customers_tab:
