@@ -1,5 +1,7 @@
 # Online Retail Customer Analytics
 
+[![CI](https://github.com/tfy20030726-spec/online-retail-customer-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/tfy20030726-spec/online-retail-customer-analytics/actions/workflows/ci.yml)
+
 基于 106 万条真实在线零售交易构建的端到端数据分析项目。项目覆盖数据下载、Excel 流式清洗、质量审计、DuckDB/Parquet 分析、RFM 客户分层、同期群留存和 Streamlit 可视化。
 
 ## 项目结果
@@ -153,4 +155,3 @@ python -m venv .venv
 - 缺失客户 ID 的交易不能进入客户留存和 RFM 分析。
 - 数据只包含交易，没有页面访问、广告曝光或加购事件。
 - RFM 分层用于运营优先级，不代表因果效果或客户终身价值预测。
-
