@@ -1,6 +1,7 @@
 # Online Retail Customer Analytics
 
 [![CI](https://github.com/tfy20030726-spec/online-retail-customer-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/tfy20030726-spec/online-retail-customer-analytics/actions/workflows/ci.yml)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://online-retail-customer-analytics-zxr9uqmzzfgrc9k5qzyrhy.streamlit.app/)
 
 基于 106 万条真实在线零售交易构建的端到端数据分析项目。项目覆盖数据下载、Excel 流式清洗、质量审计、DuckDB/Parquet 分析、RFM 客户分层、同期群留存和 Streamlit 可视化。
 
@@ -113,6 +114,8 @@ python -m venv .venv
 打开 `http://127.0.0.1:8501`。
 
 ## Streamlit Cloud 部署
+
+在线演示：[打开 Streamlit Dashboard](https://online-retail-customer-analytics-zxr9uqmzzfgrc9k5qzyrhy.streamlit.app/)
 
 项目不依赖私有数据或密钥，可以直接部署：
 
