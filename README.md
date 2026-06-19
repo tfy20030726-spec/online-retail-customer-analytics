@@ -92,27 +92,36 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-下载 UCI 官方数据：
-
-```powershell
-.\.venv\Scripts\python.exe scripts\download_uci_retail.py
-```
-
-构建清洗后的 Parquet：
-
-```powershell
-.\.venv\Scripts\python.exe -m ecommerce_analytics.retail_etl `
-  --input "data\raw\online_retail_ii\online_retail_II.xlsx" `
-  --output "data\processed\retail_transactions.parquet"
-```
-
-启动 Dashboard：
+直接启动 Dashboard：
 
 ```powershell
 .\.venv\Scripts\python.exe -m streamlit run dashboard.py
 ```
 
+首次启动会自动下载 UCI 官方数据并构建 Parquet，预计需要约 1 分钟。后续启动直接复用本地文件。
+
+也可以手动执行下载和 ETL：
+
+```powershell
+.\.venv\Scripts\python.exe scripts\download_uci_retail.py
+
+.\.venv\Scripts\python.exe -m ecommerce_analytics.retail_etl `
+  --input "data\raw\online_retail_ii\online_retail_II.xlsx" `
+  --output "data\processed\retail_transactions.parquet"
+```
+
 打开 `http://127.0.0.1:8501`。
+
+## Streamlit Cloud 部署
+
+项目不依赖私有数据或密钥，可以直接部署：
+
+1. 在 Streamlit Community Cloud 连接 GitHub 账号。
+2. 选择 `tfy20030726-spec/online-retail-customer-analytics`。
+3. 分支选择 `main`，入口文件填写 `dashboard.py`。
+4. 部署后首次冷启动会下载并处理约 45 MB 的官方数据。
+
+部署环境为临时文件系统；应用休眠后重新启动时可能需要再次构建数据。
 
 ## 测试
 

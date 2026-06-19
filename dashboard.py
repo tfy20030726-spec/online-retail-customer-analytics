@@ -11,6 +11,9 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from ecommerce_analytics.retail_etl import build_retail_dataset
+from scripts.download_uci_retail import download_dataset
+
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 PARQUET_PATH = PROJECT_ROOT / "data" / "processed" / "retail_transactions.parquet"
@@ -35,6 +38,15 @@ st.set_page_config(
 def query_dataframe(sql: str, parameters: tuple[Any, ...]) -> pd.DataFrame:
     with duckdb.connect() as connection:
         return connection.execute(sql, list(parameters)).df()
+
+
+@st.cache_resource(show_spinner=False)
+def ensure_dataset(parquet_path: str) -> str:
+    output_path = Path(parquet_path)
+    if not output_path.is_file():
+        workbook_path = download_dataset(PROJECT_ROOT / "data" / "raw")
+        build_retail_dataset(workbook_path, output_path)
+    return str(output_path.resolve())
 
 
 def build_filter(
@@ -62,13 +74,13 @@ def format_currency(value: int | float) -> str:
     return f"GBP {value:,.0f}"
 
 
-if not PARQUET_PATH.is_file():
-    st.error(
-        "Real dataset is not built. Run the retail ETL command documented in README.md."
-    )
+try:
+    with st.spinner("Preparing the UCI Online Retail II dataset..."):
+        source = ensure_dataset(str(PARQUET_PATH))
+except (OSError, ValueError) as error:
+    st.error(f"Dataset preparation failed: {error}")
     st.stop()
 
-source = str(PARQUET_PATH.resolve())
 metadata = query_dataframe(
     """
     SELECT
@@ -508,4 +520,3 @@ with quality_tab:
     )
     issue_figure.update_layout(height=360, showlegend=False)
     st.plotly_chart(issue_figure, width="stretch")
-
