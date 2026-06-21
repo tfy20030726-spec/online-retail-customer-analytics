@@ -1,3 +1,4 @@
+import csv
 import tempfile
 import unittest
 from datetime import datetime
@@ -67,23 +68,45 @@ class RetailEtlTest(unittest.TestCase):
                     "France",
                 ]
             )
+            sheet.append(
+                [
+                    536381,
+                    "TEST",
+                    "Malformed quantity",
+                    "bad quantity",
+                    datetime(2010, 12, 1, 10, 0),
+                    4.5,
+                    12345,
+                    "United Kingdom",
+                ]
+            )
             workbook.save(workbook_path)
             workbook.close()
 
             output_path = root / "retail.parquet"
             summary = build_retail_dataset(workbook_path, output_path)
             overview = retail_quality_summary(output_path)
+            quarantine_path = output_path.with_suffix(".quarantine.csv")
+            with quarantine_path.open(newline="", encoding="utf-8") as file:
+                quarantined_rows = list(csv.DictReader(file))
 
-            self.assertEqual(summary["source_rows"], 3)
-            self.assertEqual(summary["quarantined_rows"], 0)
+            self.assertEqual(summary["source_rows"], 4)
+            self.assertEqual(summary["staged_rows"], 3)
+            self.assertEqual(summary["quarantined_rows"], 1)
             self.assertEqual(overview["raw_rows"], 3)
             self.assertEqual(overview["valid_sale_rows"], 1)
             self.assertEqual(overview["cancelled_rows"], 1)
             self.assertEqual(overview["missing_customer_rows"], 1)
             self.assertEqual(overview["non_positive_price_rows"], 1)
             self.assertAlmostEqual(overview["valid_revenue"], 15.30)
+            self.assertEqual(len(quarantined_rows), 1)
+            self.assertEqual(
+                quarantined_rows[0]["source_period"],
+                "Year 2010-2011",
+            )
+            self.assertEqual(quarantined_rows[0]["source_row"], "5")
+            self.assertIn("bad quantity", quarantined_rows[0]["raw_values"])
 
 
 if __name__ == "__main__":
     unittest.main()
-

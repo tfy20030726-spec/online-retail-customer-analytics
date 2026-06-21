@@ -228,7 +228,7 @@ def build_retail_dataset(
     quarantine_path = output_path.with_suffix(".quarantine.csv")
 
     try:
-        source_rows, quarantined_rows = workbook_to_staging_csv(
+        staged_rows, quarantined_rows = workbook_to_staging_csv(
             workbook_path,
             staging_path,
             quarantine_path,
@@ -243,7 +243,8 @@ def build_retail_dataset(
     summary = retail_quality_summary(output_path)
     summary.update(
         {
-            "source_rows": source_rows,
+            "source_rows": staged_rows + quarantined_rows,
+            "staged_rows": staged_rows,
             "quarantined_rows": quarantined_rows,
             "source_workbook": workbook_path.name,
             "output_parquet": output_path.name,
