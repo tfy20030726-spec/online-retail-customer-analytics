@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -48,6 +49,31 @@ def _identifier(value: Any) -> str:
     return str(value).strip()
 
 
+def _finite_number(value: Any, field_name: str) -> float:
+    if isinstance(value, bool):
+        raise ValueError(f"{field_name} must be numeric, got {value!r}")
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{field_name} must be numeric, got {value!r}") from error
+    if not math.isfinite(number):
+        raise ValueError(f"{field_name} must be finite, got {value!r}")
+    return number
+
+
+def _integer(value: Any, field_name: str) -> int:
+    number = _finite_number(value, field_name)
+    if not number.is_integer():
+        raise ValueError(f"{field_name} must be an integer, got {value!r}")
+    return int(number)
+
+
+def _customer_id(value: Any) -> str:
+    if value is None or str(value).strip() == "":
+        return ""
+    return str(_integer(value, "Customer ID"))
+
+
 def _timestamp(value: Any) -> str:
     if isinstance(value, datetime):
         timestamp = value
@@ -59,8 +85,8 @@ def _timestamp(value: Any) -> str:
 
 
 def _normalise_row(record: dict[str, Any], source_period: str) -> dict[str, Any]:
-    quantity = int(record["Quantity"])
-    unit_price = float(record["Price"])
+    quantity = _integer(record["Quantity"], "Quantity")
+    unit_price = _finite_number(record["Price"], "Price")
     return {
         "source_period": source_period,
         "invoice_no": _identifier(record["Invoice"]),
@@ -69,7 +95,7 @@ def _normalise_row(record: dict[str, Any], source_period: str) -> dict[str, Any]
         "quantity": quantity,
         "invoice_timestamp": _timestamp(record["InvoiceDate"]),
         "unit_price": unit_price,
-        "customer_id": _identifier(record["Customer ID"]),
+        "customer_id": _customer_id(record["Customer ID"]),
         "country": _text(record["Country"]),
     }
 
