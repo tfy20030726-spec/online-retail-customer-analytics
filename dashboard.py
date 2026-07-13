@@ -14,6 +14,7 @@ import streamlit as st
 from plotly.subplots import make_subplots
 
 from ecommerce_analytics.retail_etl import build_retail_dataset
+from ecommerce_analytics.rfm import RFM_SCORE_COLUMNS
 from scripts.download_uci_retail import download_dataset
 
 
@@ -293,9 +294,7 @@ with customers_tab:
         scored AS (
             SELECT
                 *,
-                6 - ntile(5) OVER (ORDER BY recency_days) AS r_score,
-                ntile(5) OVER (ORDER BY frequency) AS f_score,
-                ntile(5) OVER (ORDER BY monetary) AS m_score
+                {RFM_SCORE_COLUMNS}
             FROM customer_metrics
         )
         SELECT

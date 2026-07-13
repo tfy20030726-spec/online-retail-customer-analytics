@@ -66,7 +66,7 @@ flowchart LR
 ### 客户分析
 
 - Recency、Frequency、Monetary 指标
-- 五分位 RFM 评分
+- 同值客户保持同分的五档百分位 RFM 评分
 - Champions、Loyal、At risk 等客户分层
 - 首次购买月份同期群和 12 个月留存率
 
